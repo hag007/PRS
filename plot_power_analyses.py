@@ -33,13 +33,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='args')
     parser.add_argument('-s', '--pheno_src_path', dest='pheno_src_path', help='', default=os.path.join(constants.DATASETS_PATH, "ukbb","pheno_bc_only_scn_w.tsv"))
     parser.add_argument('-d', '--pheno_dest_path', dest='pheno_dest_path', help="", default=os.path.join(constants.DATASETS_PATH, "ukbb","pheno"))
-    parser.add_argument('-i', '--n_iterations', dest='n_iterations', default="100", help='')
-    parser.add_argument('-n', '--n_samples', dest='n_samples', default="200, 300, 400, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000", help='')
-    parser.add_argument('-p', '--prevalences', dest='prevalences', default="0.05, 0.1, 0.25, 0.5", help='')
-    parser.add_argument('-g', '--discovery', dest='discovery', default="D_bca_michailidou_2017", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
+    parser.add_argument('-i', '--n_iterations', dest='n_iterations', default="10", help='')
+    parser.add_argument('-n', '--n_samples', dest='n_samples', default="400, 800, 1000, 1500, 2000, 2500, 3000, 4000, 5000", help='')
+    parser.add_argument('-p', '--prevalences', dest='prevalences', default="0.25, 0.5", help='')
+    parser.add_argument('-g', '--discovery', dest='discovery', default="bca_313", help='') # D_bca_michailidou_2017  # UR,BEB,PJL,MSL,ASW,ACB,CEU
     parser.add_argument('-t', '--target', dest='target', default="ukbb", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
-    parser.add_argument('-imp', '--imp', dest='imp', default="imputeX", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
-    parser.add_argument('-p', '--scripts_path', dest='scripts_path', default=os.path.join(constants.PUBLIC_BASE_PATH,"codebase"), help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
+    parser.add_argument('-imp', '--imp', dest='imp', default="impute313", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
+    parser.add_argument('-sp', '--scripts_path', dest='scripts_path', default=os.path.join(constants.PUBLIC_BASE_PATH,"codebase"), help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
 
     args = parser.parse_args()
     pheno_src_path=args.pheno_src_path
@@ -51,12 +51,6 @@ if __name__ == "__main__":
     target = args.target
     imp = args.imp
     scripts_path = args.scripts_path
-
-
-    gwass=args.gwass.split(',')
-    imp=args.imp
-    targets=args.targets.split(',')
-    thresholds=args.thresholds.split(',')
 
     res_by_prevalences={}
     res_by_n_samples={}
