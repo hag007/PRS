@@ -1,6 +1,6 @@
-#/bin/sh
+#!/bin/bash
 set -e
-source parse_args.sh $@
+source parse_args.sh "$@"
 
 manager_base_folder='/specific/elkon/hagailevi/PRS'
 locks_folder=${manager_base_folder}"/locks"
@@ -8,32 +8,19 @@ logs_folder=${manager_base_folder}"/logs"
 completed_jobs_folder=${manager_base_folder}"/completed_jobs"
 input_files_folder=${manager_base_folder}"/input_files"
 cmds_folder=${manager_base_folder}"/cmds"
+
+if [[ -z $p_per_server ]]; then p_per_server=2; fi
+if [[ -z $sleeping_time ]]; then  sleeping_time=30; fi
+
 function mywait {
        while [ -e /proc/$1 ]; do
-       # echo "Process: $pid is still running" >> /home/parv/waitAndRun.log
            echo "waiting for $1" 
            sleep 1               
        done
-       # echo "Process $PID has finished" >> /home/parv/waitAndRun.log
-       # echo "done $pid";
 }
-
 
 cmd='('$(cat ${cmds_folder}/${cmd_fn}.txt)' & echo $!>&3 | tr "\n" " ") 3>pid  && echo "start running pid $(<pid)"'
 input_file=${input_files_folder}"/${input_fn}.txt"
-
-if [[ -z $p_per_server ]]; then
-    p_per_server=2
-fi
-
-if [[ -z $sleeping_time ]]; then
-    sleeping_time=30
-fi
-
-echo $cmd
-# echo $p_per_server
-# echo $sleeping_time
-# echo $input_file
 
 n_completed=0
 n_jobs=1
@@ -58,7 +45,7 @@ while [[ n_completed -lt n_jobs ]]; do
            params_string=""
            for key in "${!file_params[@]}"; do
                params_string=${params_string}${key}"="${file_params["$key"]}"_"
-               cmd_formatted=${cmd_formatted//'${'$key'}'/${file_params["$key"]}}
+               cmd_formatted=${cmd_formatted//"\${"$key"}"/${file_params["$key"]}}
            done
            params_string=${params_string%?}
            # echo ${params_string}
@@ -75,7 +62,7 @@ while [[ n_completed -lt n_jobs ]]; do
                echo "too many jobs are running on this server ($HOSTNAME). rejecting the job"
            else
                echo "start new eval"
-               (((  eval ${cmd_formatted}) && pid=$(<pid) && echo "$HOSTNAME $pid"> ${locks_folder}/${lock_name}".lock" && echo ${locks_folder}/${lock_name}".lock"  && echo "pid $pid has been started" && status_code=$(mywait $pid) && echo "done $pid with status code $status_code" && rm ${locks_folder}/${lock_name}".lock" && echo $HOSTNAME $cmd_formatted $status_code >> ${completed_jobs_folder}/${lock_name}".completed")  | tee "${logs_folder}/${HOSTNAME}_${lock_name}.log" ) &  
+               ( ( (eval ${cmd_formatted}) && pid=$(<pid) && echo "$HOSTNAME $pid"> ${locks_folder}/${lock_name}".lock" && echo ${locks_folder}/${lock_name}".lock"  && echo "pid $pid has been started" && status_code=$(mywait $pid) && echo "done $pid with status code $status_code" && rm ${locks_folder}/${lock_name}".lock" && echo $HOSTNAME $cmd_formatted $status_code >> ${completed_jobs_folder}/${lock_name}".completed")  | tee "${logs_folder}/${HOSTNAME}_${lock_name}.log" ) &
                while [[ ! -f  ${locks_folder}/${lock_name}".lock" ]] &&  [[ ! -f  ${completed_jobs_folder}/${lock_name}".completed" ]]; do
                    echo "waiting for process to start..."
                    sleep 5

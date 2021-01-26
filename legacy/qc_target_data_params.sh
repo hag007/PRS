@@ -3,17 +3,11 @@ set -e
 source constants.sh
 source parse_args.sh $@
 
-if [[ -z imp  ]]; then
-    imp="original"
-fi
-
-if [[ -z memory  ]]; then
-    memory="600000"
-fi
-
-if [[ -z threads  ]]; then
-    threads="80"
-fi
+if [[ -z ${imp}  ]]; then imp="original"; fi
+if [[ -z ${memory}  ]]; then memory="600000"; fi
+if [[ -z ${threads}  ]]; then threads="80"; fi
+if [[ -z ${maf}  ]]; then maf="80"; fi
+if [[ -z ${geno}  ]]; then geno="80"; fi
 
 
 target_dataset="${datasets_path}${target}/${imp}/"
@@ -22,15 +16,17 @@ target_dataset="${datasets_path}${target}/${imp}/"
   
   plink \
       --bfile ${target_dataset}ds \
+	  --out ${target_dataset}ds.QC \
+      --memory ${memory} \
+      --threads ${threads} \
       --maf ${maf} \
-      --hwe 1e-3 \
+      --hwe 1e-6 \
       --geno ${geno} \
       --exclude ${target_dataset}ds.dupvar \
       --make-bed \
       --write-snplist \
-      --memory ${memory} \
-      --threads ${threads} \
-      --out ${target_dataset}ds.QC
+
+
        
   #     --remove ${target_dataset}ds.excluded.populations \
   #     --mind 0.7 \

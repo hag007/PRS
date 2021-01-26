@@ -1,9 +1,7 @@
-#!/bin/sh
-
+#!/bin/bash
+set -e
 source constants.sh
-source chr_args.sh
+source parse_chrs.sh
+eval $(parse_chrs $chrs)
 
-dataset_source=$1
-dataset_destination=$2
-
-cat ${datasets_path}${dataset_source}/ds.vcf | awk '{(!a[$1, $2]++ && !b[$3]++)}' > ${dataset_path}${dataset_destination}/ds.vcf
+cat ${datasets_path}${src}/ds.vcf | awk '{(!a[$1, $2]++ && !b[$3]++)}' > ${dataset_path}${dest}/ds.vcf

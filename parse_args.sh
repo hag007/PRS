@@ -24,4 +24,4 @@ function parse_args() {
     echo "done parsing parameters."
 }
 
-parse_args $@
+parse_args "$@"

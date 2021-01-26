@@ -1,14 +1,13 @@
-import pandas as pd
-import os
 import argparse
+import os
+import pandas as pd
 import constants
-import multiprocess
 
 def reformat_gwas(args):
     discovery=args[0]
     print(f'starting reformatting {discovery}')
-    df=pd.read_csv(os.path.join(GWASS_PATH, discovery, 'gwas_raw.tsv'), delim_whitespace=True)
-    headers=pd.read_csv(os.path.join(GWASS_PATH, 'GIANT_1', 'gwas.tsv'), sep='\t').columns
+    df=pd.read_csv(os.path.join(constants.PRSS_PATH, discovery, 'gwas_raw.tsv'), delim_whitespace=True)
+    headers=pd.read_csv(os.path.join(constants.GWASS_PATH, 'GIANT_1', 'gwas.tsv'), sep='\t').columns
 
     print(list(df.columns))    
     frq_a_label=None
@@ -73,7 +72,7 @@ def reformat_gwas(args):
     if not 'MAF' in df.columns:
          print('start merging MAF')
    
-         df_maf=pd.read_csv(os.path.join(DATASETS_PATH, '1000genomes', 'ds.frq.strat'), delim_whitespace=True)
+         df_maf=pd.read_csv(os.path.join(constants.DATASETS_PATH, '1000genomes', 'ds.frq.strat'), delim_whitespace=True)
          df_maf=df_maf[df_maf.loc[:,'CLST']==discovery_population]
          df=df.merge(df_maf.loc[:,['SNP','MAF']], how='left', on='SNP')
          df.loc[:,'MAF'][df.loc[:,'MAF'].isnull()]=0.05
@@ -86,20 +85,13 @@ def reformat_gwas(args):
     if not 'SE' in df.columns:
          df.loc[:,'SE']=0.005
 
-    df.reindex(headers,axis=1).to_csv(os.path.join(GWASS_PATH, discovery, 'gwas.tsv'), index=False, sep='\t')  
+    df.reindex(headers,axis=1).to_csv(os.path.join(constants.GWASS_PATH, discovery, 'gwas.tsv'), index=False, sep='\t')
     print(f'done reformatting {discovery}')        
     
 
 
 
 if __name__=='__main__':
-
-    BASE_PATH='/specific/elkon/hagailevi/PRS/'
-    GWASS_PATH=os.path.join(BASE_PATH,'GWASs/')
-    DATASETS_PATH=os.path.join(BASE_PATH, 'datasets/')
-    PRSS_PATH=os.path.join(BASE_PATH, 'PRSs/')
-    OUTPUT_PATH=os.path.join(BASE_PATH, 'output/')
-    FIGURES_PATH=os.path.join(OUTPUT_PATH, 'figures/')
 
     parser = argparse.ArgumentParser(description='args')
     parser.add_argument('-g', '--gwass', dest='gwass', help='', default="LH_PGC-SCZ-EAS")
@@ -113,8 +105,6 @@ if __name__=='__main__':
     for discovery in gwass:
         params.append([discovery])
         reformat_gwas(params[-1])
-    # p=multiprocess.Pool(5)    
-    # p.map(reformat_gwas, params)
    
 
 

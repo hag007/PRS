@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-
 public_base_path='/specific/elkon/hagailevi/PRS/'
 base_path='/specific/netapp5/gaga/gaga-pd/prs_data/'
 private_base_path=${base_path}'datasets/dec/' 
