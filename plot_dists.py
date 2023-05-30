@@ -6,8 +6,8 @@ np.random.seed(42)
 import constants
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.rcParams["xtick.labelsize"]=20
-matplotlib.rcParams["ytick.labelsize"]=20
+# matplotlib.rcParams["xtick.labelsize"]=20
+# matplotlib.rcParams["ytick.labelsize"]=20
 import seaborn as sns
 sns.set_style('white')
 sns.set_style('ticks')
@@ -16,12 +16,14 @@ import argparse
 import functools
 import scipy 
 import matplotlib
+font = {'size'   : 30}
+matplotlib.rc('font', **font)
         
 if __name__=='__main__':    
    
     parser = argparse.ArgumentParser(description='args')
-    parser.add_argument('-d', '--gwass', dest='gwass', help='', default="LH_PGC-SCZ-EAS")
-    parser.add_argument('-t', '--targets', dest='targets',  default="chrs_full", help='')    
+    parser.add_argument('-d', '--gwass', dest='gwass', help='', default="PGC2_noAJ")
+    parser.add_argument('-t', '--targets', dest='targets',  default="1kg_ajkg14", help='')    
     parser.add_argument('-i', '--imp', dest='imp', default="original", help='') 
     parser.add_argument('-th', '--thresholds', dest='thresholds', default="0.001,0.05,0.1,0.2,0.5,1.0", help='')    
     parser.add_argument('-ep', '--excluded_pop', dest='excluded_pop', default="", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
@@ -45,13 +47,12 @@ if __name__=='__main__':
                 print(f'{discovery}_{target}')
    
                 pop_panel_path=os.path.join(constants.DATASETS_PATH,target, 'pop.panel')
-                df_samples_md=pd.read_csv(os.path.join(constants.DATASETS_PATH,target, imp, 'ds.fam'), delim_whitespace=True, header=None)
+                df_samples_md=pd.read_csv(os.path.join(constants.DATASETS_PATH,target, imp, 'ds.QC.fam'), delim_whitespace=True, header=None)
                 df_samples_md.index=df_samples_md.iloc[:,1]
                 df_samples_md.loc[:,'super_pop']=target
                 df_samples_md.loc[:,'pop']=target
                 if os.path.exists(pop_panel_path):
-                    df_samples_md=pd.read_csv(pop_panel_path, sep='\t', index_col=1)
-
+                    df_samples_md=pd.read_csv(pop_panel_path, sep='\t', index_col=1) 
                 df=pd.read_csv(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp, f'prs.{th}.profile'), delim_whitespace=True, index_col=1)
                 if len(included_populations):
                     df=df.reindex(df_samples_md.loc[:,'pop'][df_samples_md.loc[:,'pop'].isin(included_populations)].index.values).dropna()
@@ -61,7 +62,6 @@ if __name__=='__main__':
                 df=df.drop(excluded_samples)
                 super_populations=df_samples_md.loc[df.index, 'super_pop']
                 populations=df_samples_md.loc[df.index, 'pop']
- 
                 pd.Series(index=df.index, data=df.index).to_csv(os.path.join(constants.DATASETS_PATH, target, imp, "ds.included_pop.populations"), sep='\t', header=False)
        
                 super_populations_unique=np.unique(super_populations.values)
@@ -69,15 +69,17 @@ if __name__=='__main__':
                 super_pop_stds=[]
                 pop_means=[]
                 pop_stds=[]
-                fig, ax = plt.subplots(1,1,figsize=(15,15))
+                fig, ax = plt.subplots(1,1,figsize=(20,19))
                 ax2=ax.twinx()
                 ar_vals=[]
                 vals_max=-100
                 vals_min=100
                 super_to_pop={}
-                color_palettes=['PiYG_0_0.4',  'PiYG_0.6_1', 'PuOr_0_0.4', 'PuOr_0.6_1', 'bwr_0_0.4', 'bwr_0.6_1', 'spring_0_0.4', 'spring_0.6_1', 'cool_0_0.4', 'cool_0.6_1', 'RdGy_0_0.4', 'RdGy_0.6_1', 'bone_0_0.4', 'bone_0.6_1', 'pink_0_0.4', 'pink_0.6_1', 'summer_0_0.4', 'summer_0.6_1', 'copper_0_0.4', 'copper_0.6_1']
+                # color_palettes=['PiYG_0_0.4',  'PiYG_0.6_1', 'PuOr_0_0.4', 'PuOr_0.6_1', 'bwr_0_0.4', 'bwr_0.6_1', 'spring_0_0.4', 'spring_0.6_1', 'cool_0_0.4', 'cool_0.6_1', 'RdGy_0_0.4', 'RdGy_0.6_1', 'bone_0_0.4', 'bone_0.6_1', 'pink_0_0.4', 'pink_0.6_1', 'summer_0_0.4', 'summer_0.6_1', 'copper_0_0.4', 'copper_0.6_1']
+                color_palettes=['PiYG_0.8_0.9', 'PuOr_0.2_0.3', 'bwr_0.1_0.4', 'gray_0_0.1']
 
                 color_palette_dict={}
+                print(super_populations_unique)
                 for i, a in enumerate(super_populations_unique):
                     color_palette_dict[a]=color_palettes[i]
                     super_to_pop[a]=[]
@@ -113,6 +115,7 @@ if __name__=='__main__':
                 ax.set_xlim(xlim)
 
                 for i, pop in enumerate(super_populations_unique):
+                    print(pop)
                     df_p=df.reindex(super_populations[super_populations==pop].index).loc[:,'SCORE'].dropna()
                     vals=df_p[~np.isinf(df_p.values)]
                     if vals.shape[0] < 2: 
@@ -135,7 +138,13 @@ if __name__=='__main__':
                 pd.Series(super_pop_stds, index=super_populations_unique).to_csv(os.path.join(constants.OUTPUT_PATH, f'dist_super_pop_stds_{discovery}_{target}_{th}.tsv'), sep='\t')
                 pd.Series(pop_means, index=populations_unique).to_csv(os.path.join(constants.OUTPUT_PATH, f'dist_pop_means_{discovery}_{target}_{th}.tsv'), sep='\t')
                 pd.Series(pop_stds, index=populations_unique).to_csv(os.path.join(constants.OUTPUT_PATH, f'dist_pop_stds_{discovery}_{target}_{th}.tsv'), sep='\t')
-            ax.legend(loc='upper left', ncol=1, fontsize=20)
-            ax2.legend(loc='upper right', ncol=1, fontsize=20)
+            plt.subplots_adjust(right=0.7)
+            ax.set_ylabel("# individuals")
+            ax.set_xlabel('Risk score')
+            plt.setp(ax.get_xticklabels(), rotation=35)
+            ax.legend(loc=(1.05,0), ncol=1)
+            ax2.legend(loc=(1.05,0.5), ncol=1)
             plt.savefig(os.path.join(constants.FIGURES_PATH, f'dists_by_pop_{discovery}_{target}_{imp}_{th}.png'))
             plt.clf()
+
+

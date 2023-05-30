@@ -1,12 +1,9 @@
 #!/bin/bash
-set -e
-source constants.sh
+
+source constants_.sh
 source parse_args.sh "$@"
 
 # Parse input
-discovery_path=${GWASs_path}${discovery}'/'
-target_path=${datasets_path}${target}"/${imp}/"
-prs_path=${PRSs_path}${discovery}_${target}"/${imp}/"
 if [[ -z ${maf} ]]; then maf=0.05; fi
 if [[ -z ${geno} ]]; then geno=0.1; fi
 if [[ -z ${imp} ]]; then imp="original"; fi
@@ -14,12 +11,17 @@ if [[ -z ${memory} ]]; then memory=500000; fi
 if [[ -z ${threads} ]]; then threads=80; fi
 if [[ -z ${stage} ]]; then stage=4; fi
 if [[ -z ${pval_th}  ]]; then pval_th="0.1"; fi
+discovery_path=${GWASs_path}${discovery}'/'
+target_path=${datasets_path}${target}"/${imp}/"
+prs_path=${PRSs_path}${discovery}_${target}"/${imp}/"
 
 # Start pipeline
+echo $GWASs_path
 mkdir -p $prs_path || echo ""
 echo clumping
 plink \
 	--bfile ${target_path}ds.QC \
+	--keep ${datasets_path}${target}/pop.panel.EUR \
 	--clump-p1 1 \
 	--clump-p2 1 \
 	--clump-r2 0.2 \
@@ -51,6 +53,7 @@ echo "1.0 0 1.0" >> ${prs_path}range_list
 echo calculate PRS
 plink \
 	--bfile ${target_path}ds.QC \
+    --keep ${datasets_path}${target}/pop.panel.EUR \
 	--score ${discovery_path}gwas.QC.Transformed 1 4 11 header \
 	--q-score-range ${prs_path}range_list ${prs_path}SNP.pvalue \
 	--extract ${prs_path}prs.valid.snp \

@@ -1,0 +1,12 @@
+.libPaths(c('../R-env/prs-R',.libPaths()))
+source('constants.R')
+source('utils.R')
+source('calc_metrics_generic.R')
+
+grid.ids.default <- c(0.00000005,0.0000001,0.000001,0.00001,0.0001,0.001,0.005,0.01,0.05,0.1,0.2,0.3,0.4,0.5)
+args <- commandArgs(trailing = TRUE)
+list[discovery.name, target.name, imp.name, sub, pop, pheno.folder, grid.ids, cv.train.suffix, cv.test.suffix, rep,
+discovery.path, ds.path, prs.path, rep.path, rep.imp.path, prs.rep.path] <- parse.args(args, grid.ids.default)
+
+prefix="pt"
+calc.metrics(ds.path, prs.path, sub, grid.ids.full, prefix, cv.test.suffix, rep)

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 source parse_args.sh "$@"
-source constants.sh
+source constants_.sh
 
 # Parse input
 target_dataset=${datasets_path}${target}'/'

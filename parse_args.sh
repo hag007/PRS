@@ -4,10 +4,10 @@ set -e
 
 log() { printf '%s\n' "$*"; }
 error() { log "ERROR: $*" >&2; }
-usage_fatal() { error "$*"; exit 1; }
+usage_fatal() { echo 'usage_fatal: '$arg > /dev/tty; error "$*"; exit 1; }
 
 function parse_args() {
-     echo 'parsing parameters: '$1 > /dev/tty
+     echo 'parsing parameters: '"$1" > /dev/tty
   
      while [[ "$#" -gt 0  ]]; do
          arg=$1

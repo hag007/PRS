@@ -1,8 +1,8 @@
 set -e 
-source constants.sh
+source constants_.sh
 source parse_args.sh $@
 
-datasets_path=${private_base_path}
+
 
 if [[ -z $imp ]]; then
     imp="original"

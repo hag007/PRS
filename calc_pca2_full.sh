@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-source constants.sh
+source constants_.sh
 source parse_args.sh "$@"
 
 # Parse input
@@ -14,7 +14,7 @@ if [[ -z ${threads} ]]; then threads=80; fi
 if [[ -z ${stage} ]]; then stage=3; fi
 
 # Start pipeline
-if [[ ${stage} -gte 1 ]]; then
+if [[ ${stage} -le 1 ]]; then
 	echo '### QC ###'
 	plink \
 		--bfile ${target_dataset}ds \
@@ -26,7 +26,7 @@ if [[ ${stage} -gte 1 ]]; then
 		--hwe 1e-6 \
 		--make-bed
 fi
-if [[ ${stage} -gte 2 ]]; then
+if [[ ${stage} -le 2 ]]; then
 	echo '### perform prunning ###'
 	plink \
 		--bfile ${target_dataset}ds.QC \
@@ -35,7 +35,7 @@ if [[ ${stage} -gte 2 ]]; then
 		--threads ${threads} \
 		--indep-pairwise 200 50 0.25
 fi
-if [[ ${stage} -gte 3 ]]; then
+if [[ ${stage} -le 3 ]]; then
 	echo '### calc ref pca'
 	plink2 \
 		--bfile ${target_dataset}ds.QC \
@@ -43,5 +43,23 @@ if [[ ${stage} -gte 3 ]]; then
 		--memory ${memory} \
 		--threads ${threads} \
 		--extract ${target_dataset}ds.prune.in \
-		--pca approx  6
+    --make-rel \
+		--pca allele-wts approx 6 #    1000
+
 fi
+
+# if [[ ${stage} -le 4 ]]; then
+#         echo  "calc target pca"
+#         plink2 \
+#                 --bfile ${target_dataset}ds.QC \
+#                 --out ${target_dataset}ds.pca2 \
+#                 --memory ${memory} \
+#                 --threads ${threads} \
+#                 --extract ${target_dataset}ds.prune.in \
+#                 --geno 0.1 \
+#                 --mind 0.1 \
+#                 --read-freq ${target_dataset}ds.ref.acount \
+#                 --score ${target_dataset}ds.ref.eigenvec.allele 2 5 header-read no-mean-imputation variance-standardize \
+#                 --score-col-nums 6-11
+# fi
+# 
