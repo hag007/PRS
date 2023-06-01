@@ -101,14 +101,8 @@ def choose_model(methods, rep_start, rep_end, suffix):
     df_out=pd.merge(df_or_all, df_or_99, on=['method', 'prs_name', 'imp'])
     df_out.to_csv(os.path.join(constants.OUTPUT_PATH, output_fname), sep='\t')
 
-methods=["pt2", "pt3", "ls", "ld"] #"pt2","ls","ld"]
+methods=["pt2", "pt3", "ls"] # , "ld"] #"pt2","ls","ld"]
 rep_start="105_1"
 rep_end="105_6"
-suffix="bcac_minus_pl_pl_ctrl"
+suffix="all_ukb_gwas" # "bcac_minus_pl_pl_ctrl"
 choose_model(methods, rep_start, rep_end, suffix)
-
-
-
-
-
-
