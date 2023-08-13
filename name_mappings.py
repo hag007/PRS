@@ -55,6 +55,8 @@ d_prs_names={
 
 
 d_imp_names={
+        
+        'original':'No imputation',
         #AJ
         'impute2_1kg_afr2':'African',
         'impute2_1kg_sas2':'South-Asian',
@@ -78,7 +80,7 @@ d_imp_names={
         #UKB
         'impute2_1kg_afr':'African',
         'impute2_1kg_sas':'South-Asian',
-        'impute2_1kg_eur':'European (500)',
+        'impute2_1kg_eur':'European',
         'impute2_1kg_gbr':'Britain',
         'impute2_1kg_ibs':'Spain',
         'impute2_1kg_eur-minus-gbr':'European-without-British (400)',
@@ -96,7 +98,7 @@ d_imp_names={
 
 d_target_names={
         'bcac_onco_aj':'AJ',
-
+        'all': 'South-Asian,African',
         'ukbb_afr':'African',
         'ukbb_sas':'South-Asian',
         'ukbb_eur':'European',

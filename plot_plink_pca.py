@@ -15,11 +15,16 @@ matplotlib.use('Agg')
 if __name__=='__main__':    
   
     parser = argparse.ArgumentParser(description='args')
-    parser.add_argument('-t', '--target', dest='targets',  default="hadassa", help='')
-    parser.add_argument('-r', '--ref_dataset', dest='ref_dataset',  default="bcac_onco_eur/impX_new", help='')
+    parser.add_argument('-t', '--target', dest='targets',  default="1kg_ajkg14", help='')
+    parser.add_argument('-r', '--ref_dataset', dest='ref_dataset',  default="", help='')
     parser.add_argument('-p', '--pop_type', dest='pop_type', default="pop", help='')    
-    parser.add_argument('-i', '--imp', dest='imp', default="impute2_1kg_eur-multi", help='')
+    parser.add_argument('-i', '--imp', dest='imp', default="original", help='')
     parser.add_argument('-ep', '--excluded_pop', dest='excluded_pop', default="", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
+#     ip=",".join(["Bantu","Biaka","Mandenka","Mbuti","San","Yoruba",
+# "Balochi","Brahui","Burusho","Hazara","Kalash","Makrani","Pathan","Sindhi","Uygur",
+# "Adygei","Basque","Bergamo","French","Orcadian","Russian","Sardinian","Tuscan",
+# "Cambodian","Dai","Daur","Han","Hezhen","Japanese","Lahu","Miao","Mongolian","Naxi","Northern","Oroqen","She","Tu","Tujia","Xibo","Yakut","Yi",
+# "ZAJ14","ZAJ18"])
     parser.add_argument('-ip', '--included_pop', dest='included_pop', default="", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU 
     parser.add_argument('-es', '--excluded_samples', dest='excluded_samples', default="", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
     parser.add_argument('-is', '--included_samples', dest='included_samples', default="", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU 
@@ -81,8 +86,10 @@ if __name__=='__main__':
             df=pd.read_csv(os.path.join(constants.DATASETS_PATH, target, imp, 'ds.eigenvec'), index_col=1, delim_whitespace=True, header=None)
             df=df.iloc[:,1:]
             print(df.columns)
+            var_filename=os.path.join(constants.DATASETS_PATH, target, imp, 'ds.rel')
+            if os.path.exists(var_filename):
+                total_var=open(var_filename, 'r').readlines()
             eigenvals=open(os.path.join(constants.DATASETS_PATH, target, imp, 'ds.eigenval'), 'r').readlines()
-            total_var=eigenvals
             print("calculaute eigen-vectors from eigenvec file ")
 
             df_samples_md=pd.read_csv(os.path.join(constants.DATASETS_PATH,target, imp, 'ds.QC.fam'), delim_whitespace=True, header=None)
@@ -94,7 +101,10 @@ if __name__=='__main__':
                 df_samples_md=pd.read_csv(pop_panel_path, sep='\t', index_col=1)
                 df_samples_md=df_samples_md[~df_samples_md.index.duplicated(keep='first')]
 
+        df=df[~df.index.duplicated()]
+        df_samples_md=df_samples_md[~df_samples_md.index.duplicated()]
         if len(included_populations):
+            print(df)
             df=df.reindex(df_samples_md.loc[:,'pop'][df_samples_md.loc[:,'pop'].isin(included_populations)].index.values).dropna()
 
         df=df.reindex(df_samples_md.loc[:,'pop'][~df_samples_md.loc[:,'pop'].isin(excluded_populations)].index.values)
@@ -111,7 +121,7 @@ if __name__=='__main__':
         color_palette_dict={}
         super_to_pop={}
         pop_to_super={}
-        color_palettes=['hsv_0_1', 'hsv_0_1'] #  ['PiYG_0_0.4',  'PiYG_0.6_1', 'PuOr_0_0.4', 'PuOr_0.6_1', 'bwr_0_0.4', 'bwr_0.6_1', 'spring_0_0.4', 'spring_0.6_1', 'cool_0_0.4', 'cool_0.6_1', 'RdGy_0_0.4', 'RdGy_0.6_1', 'bone_0_0.4', 'bone_0.6_1', 'pink_0_0.4', 'pink_0.6_1', 'summer_0_0.4', 'summer_0.6_1', 'copper_0_0.4', 'copper_0.6_1', 'Blues_0_0.4', 'Blues_0.6_1', 'Greens_0_0.4', 'Greens_0.6_1', 'Oranges_0_0.4', 'Oranges_0.6_1', 'Greens_0_0.4', 'Greens_0.6_1', 'Greens_0_0.4', 'Greens_0.6_1']
+        color_palettes= ['spring_0_0.4', 'spring_0.6_1', 'bwr_0_0.4', 'bwr_0.6_1', 'PuOr_0_0.4', 'PuOr_0.6_1', 'PiYG_0_0.4',  'PiYG_0.6_1', 'cool_0_0.4', 'cool_0.6_1', 'RdGy_0_0.4', 'RdGy_0.6_1', 'bone_0_0.4', 'bone_0.6_1', 'pink_0_0.4', 'pink_0.6_1', 'summer_0_0.4', 'summer_0.6_1', 'copper_0_0.4', 'copper_0.6_1', 'Blues_0_0.4', 'Blues_0.6_1', 'Greens_0_0.4', 'Greens_0.6_1', 'Oranges_0_0.4', 'Oranges_0.6_1', 'Greens_0_0.4', 'Greens_0.6_1', 'Greens_0_0.4', 'Greens_0.6_1']
 
         for i, sp in enumerate(super_populations_unique):
             color_palette_dict[sp]=color_palettes[i]
@@ -135,8 +145,8 @@ if __name__=='__main__':
                     is_jewish_per_category=[a in str(pop) for a in jewish_pop]
                     is_jewish_pop=any(is_jewish_per_category)
                     if is_jewish_pop:
-                        c='gray'
-                        s=is_jewish_per_category.index(True)/(1.0+len(is_jewish_per_category))
+                        c='hsv'
+                        s=(is_jewish_per_category.index(True))/(1.0+len(is_jewish_per_category))
                         e=(is_jewish_per_category.index(True)+1)/(1.0+len(is_jewish_per_category))
                     else:
                         c=(color_palette_dict[pop_to_super[pop]].split('_')[0])
@@ -147,10 +157,10 @@ if __name__=='__main__':
                     mask=(labels==pop)
 
 
-                    ax.plot(df[mask].iloc[:,i].astype(np.float), df[mask].iloc[:,j].astype(np.float), marker='o', linestyle=' ', markersize=6, mec=('red' if is_jewish_pop else 'black'), mew=(.5 if is_jewish_pop else .13), markerfacecolor=color, label=f'{pop} (n={np.sum(mask)})', zorder=(2 if is_jewish_pop else 1))# , alpha=0.5)
+                    ax.plot(df[mask].iloc[:,i].astype(np.float), df[mask].iloc[:,j].astype(np.float), marker='o', linestyle=' ', markersize=6, mec=('black' if is_jewish_pop else 'black'), mew=(.5 if is_jewish_pop else .13), markerfacecolor=color, label=f'{pop} (n={np.sum(mask)})', zorder=(2 if is_jewish_pop else 1))# , alpha=0.5)
                 spacer='\t'
-                ax.set_xlabel(f"PC {i+1}", fontsize=30) # {'' if not print_var else '(var='+str(round(100*(float(eigenvals[i])/sum([float(a.split(spacer)[-1]) for a in total_var])),2))+'%)'}", fontsize=30)
-                ax.set_ylabel(f"PC {j+1}", fontsize=30) # {'' if not print_var else '(var='+str(round(100*(float(eigenvals[j])/sum([float(a.split(spacer)[-1]) for a in total_var])),2))+'%)'}", fontsize=30)
+                ax.set_xlabel(f"{'' if not print_var else '(var='+str(round(100*(float(eigenvals[i])/sum([float(a.split(spacer)[-1]) for a in total_var])),2))+'%)'}", fontsize=30)
+                ax.set_ylabel(f"{'' if not print_var else '(var='+str(round(100*(float(eigenvals[j])/sum([float(a.split(spacer)[-1]) for a in total_var])),2))+'%)'}", fontsize=30)
 
         lgd=ax.legend(loc=(1.05,-0.05), ncol=1, fontsize=30, markerscale=6)
         fig.savefig(os.path.join(constants.FIGURES_PATH, f'pca_plink_{target}_{pop_type}_{imp}.png'))

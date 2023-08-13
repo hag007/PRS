@@ -7,8 +7,6 @@ import scipy as sp
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib.patches import ConnectionPatch
-
 import numpy as np
 import pandas as pd
 pd.options.mode.chained_assignment = None
@@ -39,8 +37,8 @@ def plot_or_by_imputation(file_name_format, prs_names, discoveries, targets, imp
         if not discoveries is None:
             df_all=df_all.loc[df_all.loc[:,'prs_name'].apply(lambda a : any([a.startswith(d) for d in discoveries])),:]
 
-    # print(discoveries,targets)
-    # print(df_all)
+    print(discoveries,targets)
+    print(df_all)
     df_agg=pd.DataFrame()
     for i, method in enumerate(methods):
         df=df_all[df_all.loc[:,'method']==method]
@@ -61,6 +59,7 @@ def plot_or_by_imputation(file_name_format, prs_names, discoveries, targets, imp
         else:
             sns.boxplot(x='x_values', y=f"mean_outer_{metric}", data=df, ax=ax, color=sns.color_palette('pastel')[0],  showfliers=False, showmeans=True, meanprops={"markersize":"14", "markerfacecolor": "red", "markeredgecolor": "red", "zorder": 10}) # , fmt='-o', linestyle="None", marker='o', markersize=12)
             sns.stripplot(x='x_values', y=f"mean_outer_{metric}", data=df, ax=ax, color='blue', s=12) # , fmt='-o', linestyle="None", marker='o', markersize=12)
+
             ax.set_ylim(ax.get_ylim()[0],df.loc[:,'mean_outer_all'].max()+0.1)
             i=0
 
@@ -68,8 +67,7 @@ def plot_or_by_imputation(file_name_format, prs_names, discoveries, targets, imp
             vals1.index=vals1.loc[:,'prs_name']
             vals1=vals1.loc[:,f'mean_outer_{metric}']
 
-            # colors=['black', 'red']
-            for imp_i, imp in enumerate(imps):
+            for imp in imps:
                 if imp.split("_")[-1] in [b.split("_")[-1] for b in targets]:
                     continue
                 vals2=df.loc[df.loc[:,'imp']==imp]
@@ -77,15 +75,12 @@ def plot_or_by_imputation(file_name_format, prs_names, discoveries, targets, imp
                 vals2=vals2.loc[:,f'mean_outer_{metric}']
 
                 df_diff=(vals1-vals2).dropna()
-                # vals2=vals2.reindex(vals1.index)
-                # if imp_i ==1: # !=len(imps)-len(targets):
-                #     for vals1_i in vals1.index:
-                #         ax.plot([imp_i,2], [vals2[vals1_i], vals1[vals1_i]], color=colors[imp_i])
                 if len(df_diff)!=0:
                     pval=sp.stats.wilcoxon(df_diff, alternative='greater').pvalue
                     # pval=sp.stats.binom_test(x=len([a for a in df_diff if a >0]), n=len(df_diff))
                     ax.text(i-0.25,df.loc[:,'mean_outer_all'].max()+0.05, f'{pval:.2e}')
                     i+=1
+
 
         plt.setp(ax.get_xticklabels(), rotation=35)
         ax.set_xlabel("imputation panels")
@@ -107,18 +102,13 @@ def plot_or_by_imputation(file_name_format, prs_names, discoveries, targets, imp
         vals1.index=vals1.loc[:,'prs_name'] +"_"+ vals1.loc[:,'method']
         vals1=vals1.loc[:,f'mean_outer_{metric}']
         i=0
-        for imp_i, imp in enumerate(imps[:-len(targets)]):
+        for imp in imps[:-len(targets)]:
             if imp.split("_")[-1] in [b.split("_")[-1] for b in targets]:
                     continue
             vals2=df_agg.loc[df_agg.loc[:,'imp']==imp]
             vals2.index=vals2.loc[:,'prs_name'] +"_"+ vals2.loc[:,'method']
             vals2=vals2.loc[:,f'mean_outer_{metric}']
             df_diff=(vals1-vals2).dropna()
-            # vals2=vals2.reindex(vals1.index)
-            # colors=['black', 'red']
-            # if imp_i == 1: #  !=len(imps)-len(targets) or True:
-            #     for vals1_i in vals1.index:
-            #         plt.plot([imp_i,2], [vals2[vals1_i], vals1[vals1_i]], color=colors[i])
             if len(df_diff)!=0:
                 pval=sp.stats.wilcoxon(df_diff, alternative='greater').pvalue
                 # pval=sp.stats.binom_test(x=len([a for a in df_diff if a >0]), n=len(df_diff))
@@ -133,12 +123,9 @@ def plot_or_by_imputation(file_name_format, prs_names, discoveries, targets, imp
     ##########
 
     plt.tight_layout() # subplots_adjust(right=0.7)
+
     # ax.legend() # (loc=(0.95,0))
     plt.savefig(os.path.join(constants.FIGURES_PATH, f"or_by_panel_{metric}_{suffix}.png"))
-    # df_agg['prs_name']=df_agg['prs_name'].apply(lambda a: a.split('_')[-1])
-    # print(df_agg)
-    pd.concat((df_agg.groupby(['method', 'x_values'])['mean_outer_all'].mean().rename('mean'), df_agg.groupby(['method', 'x_values'])['mean_outer_all'].std().rename('se')), axis=1).to_csv(os.path.join(constants.OUTPUT_PATH, f"or_by_panel_{metric}_{suffix}.tsv"), sep='\t')
-    
 
 if __name__=='__main__':
 

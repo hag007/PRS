@@ -43,8 +43,8 @@ if [[ ${stage} -le 3 ]]; then
 		--memory ${memory} \
 		--threads ${threads} \
 		--extract ${target_dataset}ds.prune.in \
-    --make-rel \
-		--pca allele-wts approx 6 #    1000
+                --make-rel \
+		--pca allele-wts approx 6
 
 fi
 

@@ -13,11 +13,17 @@ def fetch_n_snps(discovery, method, pheno, cv_suffix, hp, path):
      if method=='ls':
          snp_file=os.path.join(path, 'lasso',f'prs.cv.{method}___{cv_suffix}.{hp}.weights')
          print(snp_file)
-         n_snps=len(pd.read_csv(snp_file, header=None))
-         print(f's_snps: {n_snps}')
+         weights = pd.read_csv(snp_file, header=None, sep='\t')
+         print(weights.iloc[:, -1])
+         weights = weights.loc[weights.iloc[:, -1] > 0]
+         n_snps=len(weights)
+         print(f'ls s_snps: {n_snps}')
      elif method=='ld':
          snp_file=os.path.join(path, 'ldpred',f'prs.cv.{method}___{cv_suffix}.{hp}.weights')
-         n_snps=len(pd.read_csv(snp_file, header=None))
+         weights=pd.read_csv(snp_file, header=None, sep='\t')
+         weights=weights.loc[weights.iloc[:,-1]>0]
+         n_snps=len(weights)
+         print(f'ld s_snps: {n_snps}')
      elif method=='pt3':
          snp_pvalue_file=os.path.join(constants.GWASS_PATH, discovery, 'SNP.pvalue')
          df_snp_pvalue=pd.read_csv(snp_pvalue_file, sep=' ', index_col=0)
