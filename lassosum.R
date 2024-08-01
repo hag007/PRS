@@ -51,8 +51,11 @@ print(paste0("test bed file: ", ds.test.file.name))
 #     merge(., pcs)
 # pheno <- merge(phenotype,pcs)
 
+if(ld=="eas"){
+    ld="asn"
+}
 
-ld <- "EUR.hg19" # read.table(paste(ds.path, paste0(ds.prefix,".ld.bed"), sep="/"), header=F)
+ld <- paste0(toupper(ld),".hg19") # "EUR.hg19" # read.table(paste(ds.path, paste0(ds.prefix,".ld.bed"), sep="/"), header=F)
 print(paste0("ld: ",ld))
 
 print("Read in the summary statistics")

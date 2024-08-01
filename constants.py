@@ -1,7 +1,7 @@
 import os
 
-PUBLIC_BASE_PATH = '/specific/elkon/hagailevi/PRS/'
-PRIVATE_BASE_PATH = '/specific/netapp5/gaga/gaga-pd/prs_data'
+PUBLIC_BASE_PATH = '/home/elkon2/hagailevi/PRS/'
+PRIVATE_BASE_PATH = '/home/gaga/gaga-pd/prs_data'
 GWASS_PATH = os.path.join(PUBLIC_BASE_PATH, 'GWASs/')
 DATASETS_PATH = os.path.join(PRIVATE_BASE_PATH, "datasets", "dec")
 PRSS_PATH = os.path.join(PRIVATE_BASE_PATH, 'PRSs/')
@@ -30,5 +30,19 @@ gwas_to_pheno={'D2_hght_yengo_2018':'height',
                'UKB_ast_eur':'ast',
                'UKB_hyty_eur':'hyty',
                'UKB_gerx_eur':'gerx',
-               'UKB_madd_eur':'madd'} # ['D2_hdlp_willer_2013']='chol' ['D_t2d_mahajan_2018']='t2d'
+               'UKB_madd_eur':'madd',
+               'GC_ctrt_sakaue_2021': 'ctrt',
+               'GC_angna_sakaue_2021': 'angna',
+               'GC_utfi_sakaue_2021': 'utfi',
+               'GC_t2d_sakaue_2021': 't2d',
+               'GC_osar_sakaue_2021': 'osar',
+               'GC_hfvr_sakaue_2021': 'hfvr',
+               'GC_hght_sakaue_2021': 'hght',
+               'GC_chol_sakaue_2021': 'chol',
+               'GC_sysp_sakaue_2021': 'ht',
+               'GC_ast_sakaue_2021': 'ast',
+               'GC_hyty_sakaue_2021': 'hyty',
+               'GC_gerx_sakaue_2021': 'gerx',
+               'GC_madd_sakaue_2021': 'madd'
+               } # ['D2_hdlp_willer_2013']='chol' ['D_t2d_mahajan_2018']='t2d'
 

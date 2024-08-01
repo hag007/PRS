@@ -8,12 +8,20 @@ if [[ -z ${__init_args_pt__} ]]; then
     source init_args_pt.sh
 fi
 
+echo "prs_prefix: ${prs_prefix}"
+echo "sub: ${sub}"
 echo ${prs_path}${prs_prefix}${sub}${ld}_ld.clumped
 
-if [[ ${stage} -le 1 && ! -f ${prs_path}${prs_prefix}${sub}${ld}_ld.clumped ]]; then
+if [[ ! -f ${imp_train_path}${ds_prefix}${train_suffix}.bim ]]; then
+    echo "${imp_train_path}"${ds_prefix}${train_suffix}.bim does not exists. Skipping...
+    exit 0
+fi
+
+if [[ ${stage} -le 1 && ! -f ${prs_path}${prs_prefix}${sub}_${ld}_ld.clumped ]]; then
 
     if [[ ! -f ${imp_train_path}/ds.dupvar ]]; then
-        touch ${imp_train_path}/ds.dupvar
+        echo "." > ${imp_train_path}ds.dupvar
+        cat ${imp_train_path}ds.bim | cut -f 2 | sort | uniq -d >> ${imp_train_path}ds.dupvar
     fi
     echo clumping
     plink \
@@ -27,15 +35,15 @@ if [[ ${stage} -le 1 && ! -f ${prs_path}${prs_prefix}${sub}${ld}_ld.clumped ]]; 
       --clump ${discovery_path}gwas.QC.Transformed \
       --clump-snp-field SNP \
       --clump-field P \
-      --out ${prs_path}${prs_prefix}${sub}${ld}_ld \
+      --out ${prs_path}${prs_prefix}${sub}_${ld}_ld \
       --memory ${memory} \
       --threads ${threads} \
       --exclude ${imp_train_path}ds.dupvar
 fi
 
-if [[ ${stage} -le 1 && ! -f ${prs_path}${prs_prefix}${sub}${ld}_ld.valid.snp ]]; then
+if [[ ${stage} -le 1 && ! -f ${prs_path}${prs_prefix}${sub}_${ld}_ld.valid.snp ]]; then
     echo filter by clumping
-    awk 'NR!=1{print $3}' ${prs_path}${prs_prefix}${sub}${ld}_ld.clumped >  ${prs_path}${prs_prefix}${sub}${ld}_ld.valid.snp
+    awk 'NR!=1{print $3}' ${prs_path}${prs_prefix}${sub}_${ld}_ld.clumped >  ${prs_path}${prs_prefix}${sub}_${ld}_ld.valid.snp
 fi
 
 if [[ ${stage} -le 2 ]]; then
@@ -61,13 +69,11 @@ if [[ ${stage} -le 2 ]]; then
     echo ${ds_prefix}
     echo ${train_suffix}
     echo ${sub}
-
     plink \
     	--bfile ${imp_test_path}${ds_prefix}${sub}${test_suffix} \
-        --keep ${target_test_path}/pheno${sub} \
     	--score ${discovery_path}gwas.QC.Transformed 1 4 11 header \
     	--q-score-range ${prs_path}range_list ${discovery_path}SNP.pvalue \
-    	--extract ${prs_path}${prs_prefix}${sub}${ld}_ld.valid.snp \
+    	--extract ${prs_path}${prs_prefix}${sub}_${ld}_ld.valid.snp \
         --exclude ${imp_train_path}ds.dupvar \
     	--memory ${memory} \
     	--threads ${threads} \

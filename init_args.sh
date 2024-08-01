@@ -10,7 +10,7 @@ if [[ -z ${pop}  ]]; then pop=""; fi
 if [[ -z ${pheno}  ]]; then pheno=""; fi
 if [[ -z ${continuous}  ]]; then continuous="false"; fi
 if [[ -z ${cv} ]]; then cv=""; fi
-if [[ -z ${rep} ]]; then echo "please provide rep value" && exit 1; fi
+# if [[ -z ${rep} ]]; then echo "please provide rep value" && exit 1; fi
 
 sub=""
 

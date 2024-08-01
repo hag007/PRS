@@ -48,17 +48,20 @@ def reformat_gwas(args):
          if a in df.columns:
               df.loc[:,'SNP']=df.loc[:,a]
     
-    for a in ['Chr', 'Chromosome', 'chr', 'chromosome', 'CHROM']:
+    for a in ['Chr', 'Chromosome', 'chr', 'chromosome', 'CHROM', '#CHROM']:
          if a in df.columns:
               df.loc[:,'CHR']=df.loc[:,a]
 
-    for a in ['Effect_allele', 'effect_allele', 'a1', 'ALLELE1', 'ALT']:
-        if a in df.columns:
-              df.loc[:,'A1']=df.loc[:,a]
+    if all([f in df.columns for f in ['A1','ALT','REF']]):
+        df.loc[:, 'A2'] = df.apply(lambda a: a['REF'] if a['ALT']==a['A1'] else a['ALT'], axis=1)
+    else:
+        for a in ['Effect_allele', 'effect_allele', 'a1', 'ALLELE1', 'ALT']:
+            if a in df.columns:
+                  df.loc[:,'A1']=df.loc[:,a]
 
-    for a in ['Non_Effect_allele', 'noneffect_allele', 'a2', 'other_allele', 'ALLELE0', 'REF']:
-         if a in df.columns:
-              df.loc[:,'A2']=df.loc[:,a]
+        for a in ['Non_Effect_allele', 'noneffect_allele', 'a2', 'other_allele', 'ALLELE0', 'REF']:
+             if a in df.columns:
+                  df.loc[:,'A2']=df.loc[:,a]
 
     for a in ['sample_size']:
          if a in df.columns:

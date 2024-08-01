@@ -69,7 +69,7 @@ if [[ ${stage} -le 2 ]]; then
 fi
 
 if [[ ${stage} -le 3 ]]; then
-        /specific/elkon/hagailevi/PRS/prs-python2/bin/python /specific/elkon/hagailevi/PRS/codebase/prepare_gwas.py --gwass ${discovery} --discovery_population ${super_pop} --N 50000
+        /specific/elkon/hagailevi/PRS/prs-python2/bin/python /specific/elkon/hagailevi/PRS/codebase/prepare_gwas.py --discovery ${discovery} --discovery_population ${super_pop} --N 50000
 fi
 
 if [[ ${stage} -le 4 ]]; then

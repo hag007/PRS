@@ -9,4 +9,4 @@ grid.ids.default <- "0.00000005,0.0000001,0.000001,0.00001,0.0001,0.001,0.005,0.
 args <- commandArgs(trailing = TRUE)
 parse.args(args, grid.ids.default, method)
 
-calc.metrics(target.path, imp, prs.path, sub, grid.ids, prs.prefix, test.suffix, rep)
+calc.metrics(target.path, imp, prs.path, sub, grid.ids, prs.prefix, test.suffix, rep, analysis.type)

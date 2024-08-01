@@ -8,6 +8,12 @@ if [[ -z ${__init_args_pt__} ]]; then
     source init_args_pt.sh
 fi
 
+if [[ ! -f ${imp_train_path}${ds_prefix}${train_suffix}.bim ]]; then
+    echo "${imp_train_path}". Skipping...
+    exit 0
+fi
+
+
 if [[ ${stage} -le 1 ]]; then
     if [[ ! -f ${imp_train_path}/ds.dupvar ]]; then
         touch ${imp_train_path}/ds.dupvar

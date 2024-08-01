@@ -16,7 +16,7 @@ declare -A gwas_to_pheno=(['D2_hght_yengo_2018']='height' ['D2_ldlp_willer_2013'
 ['UKB_ht_eur']='ht' ['UKB_chol_eur']='chol' ['UKB_hfvr_eur']='hfvr' ['UKB_hyty_eur']='hyty'  ['UKB_madd_eur']='madd' ['UKB_osar_eur']='osar' ['UKB_t2d_eur']='t2d' ['UKB_utfi_eur']='utfi' ['UKB_gerx_eur']='gerx' ['UKB_angna_eur']='angna' ['UKB_ast_eur']='ast' ['UKB_ctrt_eur']='ctrt')
 
 counter=0
-min_n_profiles=80
+min_n_profiles=60
 min_n_profiles_res3=10
 
 for discovery in ${discoveries[@]}; do

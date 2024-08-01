@@ -6,6 +6,7 @@ np.random.seed(42)
 import constants
 import matplotlib.pyplot as plt
 import matplotlib
+matplotlib.use('Agg')
 font = {'size'   : 40}
 matplotlib.rc('font', **font)
 import seaborn as sns
@@ -19,10 +20,12 @@ import scipy as sp
 if __name__=='__main__':
 
     parser = argparse.ArgumentParser(description='args')
-    parser.add_argument('-d', '--gwass', dest='gwass', help='', default="bcac_onco_eur-5pcs")
-    parser.add_argument('-t', '--targets', dest='targets',  default="bcac_onco_aj", help='')
-    parser.add_argument('-i', '--imp', dest='imp', default="impX_new", help='')
-    parser.add_argument('-th', '--thresholds', dest='thresholds', default="0.5-13", help='')     # 0.001,0.05,0.1,0.2,0.5
+    parser.add_argument('-d', '--gwass', dest='gwass', help='', default="PC_glcm_craig_2020")
+    parser.add_argument('-t', '--targets', dest='targets',  default="ukbb_sas", help='')
+    parser.add_argument('-i', '--imp', dest='imp', default="imputeX", help='')
+    parser.add_argument('-th', '--thresholds', dest='thresholds', default="-1", help='')     # 0.001,0.05,0.1,0.2,0.5
+    parser.add_argument('-p', '--pheno', dest='pheno', default="glcm", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
+    parser.add_argument('-m', '--method', dest='method', default="pt", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
     parser.add_argument('-ep', '--excluded_pop', dest='excluded_pop', default="", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
     parser.add_argument('-ip', '--included_pop', dest='included_pop', default="", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
     parser.add_argument('-es', '--excluded_samples', dest='excluded_samples', default="", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
@@ -33,6 +36,8 @@ if __name__=='__main__':
 
     gwass=args.gwass.split(',')
     imp=args.imp
+    pheno=args.pheno
+    method=args.method
     targets=args.targets.split(',')
     thresholds=args.thresholds.split(',')
     excluded_populations=args.excluded_pop.split(',') if args.excluded_pop != "" else []
@@ -45,7 +50,8 @@ if __name__=='__main__':
 
                 print(f'{discovery}_{target}')
 
-                pheno_path=os.path.join(constants.DATASETS_PATH,target, 'pheno')
+                pheno_path=os.path.join(constants.DATASETS_PATH,target, f'pheno{("_"+pheno+"_") if pheno!="" else ""}')
+                print(pheno_path)
                 pop_panel_path=os.path.join(constants.DATASETS_PATH,target, 'pop.panel')
                 df_samples_md=pd.read_csv(os.path.join(constants.DATASETS_PATH,target, imp, 'ds.QC.fam'), delim_whitespace=True, header=None)
                 df_samples_md.index=df_samples_md.iloc[:,1]
@@ -53,7 +59,7 @@ if __name__=='__main__':
                 df_samples_md.loc[:,'pop']=target
                 if os.path.exists(pop_panel_path):
                     df_samples_md=pd.read_csv(pop_panel_path, sep='\t', index_col=0)
-                    df_samples_md.index=df_samples_md.index.astype(str)
+                df_samples_md.index=df_samples_md.index.astype(str)
 
                 df_pheno=None
 
@@ -63,41 +69,36 @@ if __name__=='__main__':
                 df_or_p_value=pd.DataFrame()
                 df_or_all=pd.DataFrame()
                 df=pd.DataFrame()
-                rep=105
-                rep_start=1
-                rep_end=1
-                for a in range(rep_start,rep_end+1):
-                    if os.path.exists(pheno_path):
-                        df_pheno=pd.read_csv(pheno_path, sep='\t') # , index_col=0
-                        # df_pheno.index=df_pheno.index.astype(str)
-                        df_statistics=pd.concat((df_statistics, pd.read_csv(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp, f"rep_{rep}_{a}", f'prs.cv.ls___5_test.ctrl.statistics.{th}.tsv'), sep='\t'))) # , index_col=0
-                        df_or_percentile=pd.concat((df_or_percentile, pd.read_csv(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp,f"rep_{rep}_{a}",f'prs.cv.ls___5_test.ctrl.or.percentile.{th}.tsv'), sep='\t')))
-                        df_or_p_value=pd.concat((df_or_p_value, pd.read_csv(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp,f"rep_{rep}_{a}",f'prs.cv.ls___5_test.ctrl.or.p.value.{th}.tsv'), sep='\t')))
-                        df_or_all=pd.concat((df_or_all, pd.read_csv(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp,f"rep_{rep}_{a}",f'prs.cv.ls___5_test.ctrl.or.all.{th}.tsv'), sep='\t')))
+                if os.path.exists(pheno_path):
+                    df_pheno=pd.read_csv(pheno_path, sep='\t') # , index_col=0
+                    # _statistics=pd.read_csv(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp, f"rep_{rep}_{a}", f'prs.mono.pt.statistics.{th}.tsv'), sep='\t') # , index_col=0
+                    # df_or_percentile=pd.concat((df_or_percentile, pd.read_csv(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp,f"rep_{rep}_{a}",f'prs.cv.ls___5_test.ctrl.or.percentile.{th}.tsv'), sep='\t')))
+                    # df_or_p_value=pd.concat((df_or_p_value, pd.read_csv(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp,f"rep_{rep}_{a}",f'prs.cv.ls___5_test.ctrl.or.p.value.{th}.tsv'), sep='\t')))
+                    # df_or_all=pd.concat((df_or_all, pd.read_csv(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp,f"rep_{rep}_{a}",f'prs.cv.ls___5_test.ctrl.or.all.{th}.tsv'), sep='\t')))
 
                     # print(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp, "rep_72", f'prs.cv.ls___5_test{"."+th if th!="" else ""}.profile'))
-                    df_prs=pd.read_csv(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp, f"rep_105_{a}", f'prs.cv.ls___5_test{"."+th if th!="" else ""}.profile'), delim_whitespace=True)
-                    df_prs.loc[:,'SCORE']=sp.stats.zscore(df_prs.loc[:,'SCORE'])
-                    df=pd.concat((df, df_prs)) # , index_col=0
-
-
-
+                    print(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp, f'prs.mono.{method}{"_"+pheno+"_" if pheno!="" else ""}{"."+th if th!="-1" else ""}.profile'))
+                    df=pd.read_csv(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp, f'prs.mono.{method}{"_"+pheno+"_" if pheno!="" else ""}{"."+th if th!="-1" else ""}.profile'), index_col=0, delim_whitespace=True)
+                    df.index.name=f"{df.index.name}_"
+                    df.loc[:,'SCORE']=sp.stats.zscore(df.loc[:,'SCORE'])
+                df.index=df.index.astype(str)
                 # df.index=df.index.astype(str)
-                print(df.index)
+                print(df)
 
                 if len(included_populations):
                     df=df.reindex(df_samples_md.loc[:,'pop'][df_samples_md.loc[:,'pop'].isin(included_populations)].index.values).dropna()
-
                 if len(excluded_populations):
                     df=df.reindex(df_samples_md.loc[:,'pop'][~df_samples_md.loc[:,'pop'].isin(excluded_populations)].index.values).dropna()
                 if len(included_samples):
                     df=df.reindex(included_samples).dropna()
+                print(df)
                 print(df.iloc[:,0])
                 df=df.drop(excluded_samples)
 
-                super_populations=df_samples_md.loc[df.iloc[:,0], 'super_pop']
-                populations=df_samples_md.loc[df.iloc[:,0], 'pop']
-
+                super_populations=df_samples_md.reindex(df.iloc[:,0].astype(int).astype(str)).loc[:,'super_pop']
+                print("pop:\n", df_samples_md.head(), df.iloc[:,[0]].astype(int).astype(str).head())
+                populations=df_samples_md.reindex(df.iloc[:,0].astype(int).astype(str)).loc[:, 'pop']
+                print("populations:\n",populations)
                 # pd.Series(index=df.iloc[:,0], data=df.iloc[:,0]).to_csv(os.path.join(constants.DATASETS_PATH, target, imp, "ds.included_pop.populations"), sep='\t', header=False)
 
                 super_populations_unique=np.unique(super_populations.values)
@@ -124,27 +125,38 @@ if __name__=='__main__':
                     colors=[]
                     pop_to_super={}
                     populations_unique=np.unique(populations.values)
+                    # print('===\n', populations)
                     for i, pop in enumerate(populations_unique):
+                        print(df_samples_md.loc[:,'pop'], pop, populations_unique)
                         super_pop=df_samples_md[df_samples_md.loc[:,'pop']==pop].iloc[0].loc['super_pop']
                         super_to_pop[super_pop].append(pop)
                         pop_to_super[pop]=super_pop
 
+                    print(pop_to_super)
                     populations_unique=functools.reduce(lambda q,w: q+w, [a for a in super_to_pop.values()])
 
                     for i, pop in enumerate(populations_unique): # enumerate(populations_unique):
+                        print("++")
+                        print(populations[populations==pop].head().index)
+                        print(df.head())
                         if len(populations_unique)>1:
                             df_p=df.reindex(populations[populations==pop].index)
                         else:
                             df_p=df
+                        df_p.index=df_p.index.astype(str)
+                        df_p.index.name="idx"
 
                         pop_vals=df_p[np.logical_and(~df_p.loc[:,'SCORE'].isnull().values, ~np.isinf(df_p.loc[:,'SCORE'].values))]
                         super_pop_means.append(pop_vals.mean())
                         super_pop_stds.append(pop_vals.std())
-                        print("pop_vals shape:", np.unique(pop_vals.loc[:,'FID']).shape)
-                        print("df_pheno shape:", np.unique(df_pheno.loc[:,'FID']).shape)
+                        print("pop_vals shape:", np.unique(pop_vals).shape)
+                        print("df_pheno shape:", np.unique(df_pheno).shape)
                         if not df_pheno is None:
-                            df_cur_pheno=  pd.merge(pop_vals, df_pheno, on='FID').dropna()
-                            print("df_cur_pheno shape:", np.unique(df_cur_pheno.loc[:,'FID']).shape)
+                            print("====")
+                            print(pop_vals.head())
+                            print(df_pheno.head())
+                            df_cur_pheno=  pd.merge(pop_vals, df_pheno, on='IID').dropna()
+                            print("df_cur_pheno shape:", len(np.unique(df_cur_pheno.index)))
                             unique_pheno=np.unique(df_cur_pheno.loc[:, 'label'].values)
                             for cur_pheno_val in unique_pheno:
                                 cur_pheno_val=int(cur_pheno_val)
@@ -175,7 +187,7 @@ if __name__=='__main__':
                     super_pop_means.append(pop_vals.loc[:,'SCORE'].mean())
                     super_pop_stds.append(pop_vals.loc[:,'SCORE'].std())
                     if not df_pheno is None:
-                        df_cur_pheno=pd.merge(pop_vals, df_pheno, on='FID').dropna() # df_pheno.reindex(pop_vals.index).loc[:, 'label'].dropna()
+                        df_cur_pheno=pd.merge(pop_vals, df_pheno, on='IID').dropna() # df_pheno.reindex(pop_vals.index).loc[:, 'label'].dropna()
 
                         unique_pheno=np.unique(df_cur_pheno.loc[:,'label'].values)
                         for cur_pheno_val in unique_pheno:

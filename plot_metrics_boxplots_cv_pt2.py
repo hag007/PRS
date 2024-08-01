@@ -1,5 +1,5 @@
 import argparse
-from plot_metrics_boxplots_cv_generic import plot_boxplot_cv_multi_test
+from aggregate_folds_cv_generic import aggregate_folds_cv_multi_test
 
 if __name__=='__main__':
 
@@ -33,7 +33,7 @@ if __name__=='__main__':
     field_name=metric_name
     suffix=args.suffix
 
-    plot_boxplot_cv_multi_test(metric_name, file_name_format.format(suffix), field_name, discoveries, targets, imps=imps, out_suffix=suffix, rep_start=rep_start, rep_end=rep_end, hyperparameters=hyperparameters)
+    aggregate_folds_cv_multi_test(metric_name, file_name_format.format(suffix), field_name, discoveries, targets, imps=imps, out_suffix=suffix, rep_start=rep_start, rep_end=rep_end, hyperparameters=hyperparameters)
     # plot_boxplot_cv_single_test(metric_name, file_name_format, field_name, prs_names=prs_names, imps=imps, out_suffix=f"bcac_aj_{metric_name}", rep_start=1, rep_end=1, hyperparameters=ths)
 
 

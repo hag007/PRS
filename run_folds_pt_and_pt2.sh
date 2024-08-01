@@ -9,9 +9,9 @@ targets=${targets//,/ }
 # imps="impX_new" # "impute2_1kg_gbr,impute2_1kg_eur,impute2_1kg_${pop}" # ,impute2_1kg_afr" # ,impute2_1kg_sas "impute2_1kg_ceu2"
 imps=${imps//,/ }
 method=${method}
-base_rep=105
-folds=5
 
+if [[ -z  ${base_rep} ]]; then base_rep=105; fi
+if [[ -z  ${folds} ]]; then folds=5; fi
 if [[ -z  ${rep_start} ]]; then rep_start=1; fi
 if [[ -z  ${rep_end} ]]; then rep_end=6; fi
 if [[ -z  ${fold_start} ]]; then fold_start=1; fi
@@ -22,7 +22,7 @@ declare -A gwas_to_pheno=(['D2_hght_yengo_2018']='height' ['D2_ldlp_willer_2013'
 
 
 counter=0
-min_n_profiles=14
+min_n_profiles=120
 echo "start with discoveries=${discoveries}, targets=${targets}, imps=${imps}"
 for discovery in ${discoveries[@]}; do
     pheno=${gwas_to_pheno[${discovery}]}
@@ -30,8 +30,10 @@ for discovery in ${discoveries[@]}; do
         for imp in ${imps[@]}; do
             for cur_rep in `seq ${rep_start} ${rep_end}`; do
                 for fold in `seq ${fold_start} ${fold_end}`; do
-                    res1=$(ls -1 /specific/netapp5/gaga/gaga-pd/prs_data/PRSs//${discovery}_${target}/${imp}/rep_${base_rep}_${cur_rep}/prs.cv.${method}_${pheno}__${fold}_${folds}_validation.*.profile 2>/dev/null| wc -l ) ;
-                    res3=$(ls -1 /specific/netapp5/gaga/gaga-pd/prs_data/PRSs//${discovery}_${target}/${imp}/rep_${base_rep}_${cur_rep}/prs.cv.${method}_${pheno}__${fold}_${folds}_validation.ctrl.or.summary.*.tsv 2>/dev/null | wc -l );
+                    echo "test /home/gaga/gaga-pd/prs_data/PRSs//${discovery}_${target}/${imp}/rep_${base_rep}_${cur_rep}/prs.cv.${method}_${pheno}__${fold}_${folds}_validation.*.profile"
+                    echo "test /specific/netapp5/gaga/gaga-pd/prs_data/PRSs//${discovery}_${target}/${imp}/rep_${base_rep}_${cur_rep}/prs.cv.${method}_${suffix}__${fold}_${folds}_validation.or.summary.*.tsv"
+                    res1=$(ls -1 /home/gaga/gaga-pd/prs_data/PRSs//${discovery}_${target}/${imp}/rep_${base_rep}_${cur_rep}/prs.cv.${method}_${pheno}__${fold}_${folds}_validation.*.profile 2>/dev/null| wc -l ) ;
+                    res3=$(ls -1 /specific/netapp5/gaga/gaga-pd/prs_data/PRSs//${discovery}_${target}/${imp}/rep_${base_rep}_${cur_rep}/prs.cv.${method}_${suffix}__${fold}_${folds}_validation.or.percentile.*.tsv 2>/dev/null | wc -l );
                     stage=-1
                     if [[ ${res3} -lt ${min_n_profiles} ]]; then
                         stage=3
@@ -41,7 +43,8 @@ for discovery in ${discoveries[@]}; do
                     fi
                     echo "Discovery: ${discovery}, Target: ${target}, imp: ${imp}, rep: ${cur_rep}, fold: ${fold}: res validation: stage 1 - ${res1}, stage 3 - ${res3}"
                     if [[ ${stage} -ne -1 ]]; then
-                        if [[ ${complete_missing} = "true" ]]; then
+                        if [[ ${complete_missing} == "true" ]]; then
+                           echo "bash calc_prs_cv_${method}.sh --discovery ${discovery} --target ${target} --imp ${imp} --cv ${fold}_${folds} --rep ${base_rep}_${cur_rep} --stage ${stage}" # --pheno ${pheno}
                            bash calc_prs_cv_${method}.sh --discovery ${discovery} --target ${target} --imp ${imp} --cv ${fold}_${folds} --rep ${base_rep}_${cur_rep} --stage ${stage} # --pheno ${pheno}
                         fi
                         echo "Discovery: ${discovery}, Target: ${target}, imp: ${imp}, rep: ${cur_rep}, fold: ${fold}: res validation: stage 1 - ${res1}, stage 3 - ${res3}"
@@ -49,7 +52,7 @@ for discovery in ${discoveries[@]}; do
                     fi
                 done;
                 res1=$(ls -1 /specific/netapp5/gaga/gaga-pd/prs_data/PRSs//${discovery}_${target}/${imp}/rep_${base_rep}_${cur_rep}/prs.cv.${method}_${pheno}__${fold}_test.*.profile 2>/dev/null | wc -l);
-                res3=$(ls -1 /specific/netapp5/gaga/gaga-pd/prs_data/PRSs//${discovery}_${target}/${imp}/rep_${base_rep}_${cur_rep}/prs.cv.${method}_${pheno}__${fold}_test.ctrl.or.summary.*.tsv 2>/dev/null | wc -l );
+                res3=$(ls -1 /specific/netapp5/gaga/gaga-pd/prs_data/PRSs//${discovery}_${target}/${imp}/rep_${base_rep}_${cur_rep}/prs.cv.${method}_${pheno}__${fold}_test.or.percentile.*.tsv 2>/dev/null | wc -l );
                 # echo "Discovery: ${discovery}, Target: ${target}, imp: ${imp}, rep: ${cur_rep}, fold: ${fold}: res test: stage 1 - ${res1}, stage 3 - ${res3}"
                 stage=-1
                 if [[ ${res3} -lt ${min_n_profiles} ]]; then
@@ -60,7 +63,7 @@ for discovery in ${discoveries[@]}; do
                 fi
                 if [[ ${stage} -ne -1 ]]; then
                     if [[ ${complete_missing} = "true" ]]; then
-                        bash calc_prs_cv_${method}.sh --discovery ${discovery} --target ${target} --imp ${imp} --cv 5 --rep ${base_rep}_${cur_rep} --stage ${stage} # --pheno ${pheno}
+                        bash calc_prs_cv_${method}.sh --discovery ${discovery} --target ${target} --imp ${imp} --cv ${folds} --rep ${base_rep}_${cur_rep} --stage ${stage} # --pheno ${pheno}
                     fi
                     echo "Discovery: ${discovery}, Target: ${target}, imp: ${imp}, rep: ${cur_rep}, fold: ${fold}: res test: stage 1 - ${res1}, stage 3 - ${res3}"
                     counter=$((${counter}+1))

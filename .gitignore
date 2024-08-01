@@ -2,4 +2,5 @@
 /legacy
 .idea
 /__pycache__
-.ipynb_checkpoints
+PRS-notebooks
+.ipynb_checkpoints/

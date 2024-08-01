@@ -8,4 +8,4 @@ grid.ids.default <- paste(c(1:102),sep=",")
 args <- commandArgs(trailing = TRUE)
 parse.args(args, grid.ids.default, method)
 
-calc.metrics(target.path, imp, prs.path, sub, grid.ids, prs.prefix, suffix, rep)
+calc.metrics(target.path, imp, prs.path, sub, grid.ids, prs.prefix, suffix, rep, analysis.type)

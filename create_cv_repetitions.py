@@ -1,3 +1,5 @@
+## args = --dataset (only data name) --folds (number of folds) --rep (base_rep)
+
 import argparse
 import os
 
@@ -9,11 +11,11 @@ import constants
 if __name__=="__main__":
     constants.DATASETS_PATH=constants.DATASETS_PATH 
     parser = argparse.ArgumentParser(description='args')
-    parser.add_argument('-d', '--dataset', dest='dataset', help='', default='bcac_onco_pl')
+    parser.add_argument('-d', '--dataset', dest='dataset', help='', default='bcac_onco_eas')
     parser.add_argument('-p', '--population', dest='population', help="", default='')
     parser.add_argument('-ph', '--phenotype', dest='phenotype', help="", default="")
-    parser.add_argument('-f', '--folds', dest='folds', help="", default="5")
-    parser.add_argument('-r', '--rep', dest='rep', help="", default="105")
+    parser.add_argument('-f', '--folds', dest='folds', help="", default="3")
+    parser.add_argument('-r', '--rep', dest='rep', help="", default="102")
 
     args = parser.parse_args()
     dataset=args.dataset

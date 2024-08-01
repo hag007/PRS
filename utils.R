@@ -77,7 +77,7 @@ parse.grid.ids <- function(grid.ids,grid.ids.default){
 }
 
 
-parse.args <- function(input, grid.ids.default, method){
+parse.args <- function(input, grid.ids.default='', method=''){
     # Raw args
     args <- hash()
 
@@ -109,7 +109,10 @@ parse.args <- function(input, grid.ids.default, method){
 
     params[['analysis.type']] <- args[['analysis_type']]
     if(is.null(params[['analysis.type']]) || params[['analysis.type']]=='' ){
-        params[['analysis.type']]=='mono'
+        params[['analysis.type']]='mono'
+    }
+        if(is.null(params[['method']]) || params[['method']]=='' ){
+        params[['method']]=''
     }
 
     params[['imp']] <- args[['imp']]
@@ -120,6 +123,8 @@ parse.args <- function(input, grid.ids.default, method){
         params[['imp.test']] <-  args[['imp']]
     }
     params[['imp']] <- params[['imp.test']]
+
+    params[['ld']] <- args[['ld']]
 
     params[['sub']] <- args[['sub']]
 

@@ -16,24 +16,27 @@ import argparse
 import functools
 import scipy 
 import matplotlib
+matplotlib.use('Agg')
 font = {'size'   : 30}
 matplotlib.rc('font', **font)
         
 if __name__=='__main__':    
    
     parser = argparse.ArgumentParser(description='args')
-    parser.add_argument('-d', '--gwass', dest='gwass', help='', default="PGC2_noAJ")
-    parser.add_argument('-t', '--targets', dest='targets',  default="1kg_ajkg14", help='')    
-    parser.add_argument('-i', '--imp', dest='imp', default="original", help='') 
-    parser.add_argument('-th', '--thresholds', dest='thresholds', default="0.001,0.05,0.1,0.2,0.5,1.0", help='')    
-    parser.add_argument('-ep', '--excluded_pop', dest='excluded_pop', default="", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
+    parser.add_argument('-d', '--gwass', dest='gwass', help='', default="PC_glcm_craig_2020")
+    parser.add_argument('-t', '--targets', dest='targets',  default="ukbb_afr", help='')    
+    parser.add_argument('-i', '--imp', dest='imp', default="imputeX", help='') 
+    parser.add_argument('-th', '--thresholds', dest='thresholds', default="-1", help='')    # .001,0.05,0.1,0.2,0.5,1.0
+    parser.add_argument('-m', '--method', dest='method', default="pt", help='')    # .001,0.05,0.1,0.2,0.5,1.0
     parser.add_argument('-ip', '--included_pop', dest='included_pop', default="", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU 
+    parser.add_argument('-ep', '--excluded_pop', dest='excluded_pop', default="", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
     parser.add_argument('-es', '--excluded_samples', dest='excluded_samples', default="", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
     parser.add_argument('-is', '--included_samples', dest='included_samples', default="", help='')   # UR,BEB,PJL,MSL,ASW,ACB,CEU
     args = parser.parse_args()
 
     gwass=args.gwass.split(',')
     imp=args.imp
+    method=args.method
     targets=args.targets.split(',')
     thresholds=args.thresholds.split(',')
     excluded_populations=args.excluded_pop.split(',') if args.excluded_pop != "" else []
@@ -53,7 +56,7 @@ if __name__=='__main__':
                 df_samples_md.loc[:,'pop']=target
                 if os.path.exists(pop_panel_path):
                     df_samples_md=pd.read_csv(pop_panel_path, sep='\t', index_col=1) 
-                df=pd.read_csv(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp, f'prs.{th}.profile'), delim_whitespace=True, index_col=1)
+                df=pd.read_csv(os.path.join(constants.PRSS_PATH, f'{discovery}_{target}',imp, f'prs.mono.{method}{"" if th=="-1" else "."+th}.profile'), delim_whitespace=True, index_col=1)
                 if len(included_populations):
                     df=df.reindex(df_samples_md.loc[:,'pop'][df_samples_md.loc[:,'pop'].isin(included_populations)].index.values).dropna()
                 df=df.reindex(df_samples_md.loc[:,'pop'][~df_samples_md.loc[:,'pop'].isin(excluded_populations)].index.values).dropna()

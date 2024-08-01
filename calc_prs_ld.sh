@@ -2,48 +2,34 @@
 
 source constants_.sh
 source parse_args.sh "$@"
+source init_args_prs.sh
 
-# Parse input
-if [[ -z ${maf} ]]; then maf=0.05; fi
-if [[ -z ${geno} ]]; then geno=0.1; fi
-if [[ -z ${imp} ]]; then imp="original"; fi
-if [[ -z ${memory} ]]; then memory=500000; fi
-if [[ -z ${threads} ]]; then threads=80; fi
-if [[ -z ${stage} ]]; then stage=1; fi
-if [[ -z ${hp}  ]]; then hp="0.1"; fi
-if [[ -z ${pop}  ]]; then pop=""; fi
-if [[ -z ${pheno}  ]]; then pheno=""; fi
-if [[ -z ${continuous}  ]]; then continuous="false"; fi
+prs_prefix="prs.mono.ld${sub}"
+ds_prefix="ds${sub}"
 
-sub=""
-
-if [[ ! "${pheno}" == ""  ||  ! "${pop}" == "" ]]; then
-	sub=_${pheno}_${pop}
-fi
-
-if [[ ! "${pheno}" == ""  ]]; then
-        pheno=_${pheno}
-fi
-
-if [[ ! "${pop}" == "" ]]; then
-        pop=_${pop}
-fi
-
-prs_prefix="prs.ld"
-
-discovery_path=${GWASs_path}${discovery}'/'
-target_path=${datasets_path}${target}"/${imp}/"
-prs_path=${PRSs_path}${discovery}_${target}"/${imp}/"
-
-# Start pipeline
-echo $GWASs_path
+echo "Start pipeline"
 mkdir -p $prs_path || echo ""
-
+mkdir -p ${prs_path}ldpred || true
 
 if [[ ${stage} -le 1 ]]; then
-    	    Rscript ldpred.R ${discovery} ${target} ${imp} "${sub}" ${hp} ;
+            Rscript ldpred.R --discovery=${discovery} --target=${target} --imp=${imp} --analysis_type="mono";
 fi
 
+
 if [[ ${stage} -le 2 ]]; then
-    	    Rscript best_fit_prs_ld.R ${discovery} ${target} ${imp} "${sub}" ${hp};
+    for cur_hp in {1..102}; do
+        if [[ -f ${prs_path}ldpred/${prs_prefix}${train_suffix}.${cur_hp}.weights ]]; then
+            plink --bfile ${imp_test_path}${ds_prefix}${test_suffix}  \
+                  --score ${prs_path}ldpred/${prs_prefix}${train_suffix}.${cur_hp}.weights 2 5 6 \
+                  --exclude ${imp_test_path}ds.dupvar \
+                  --out ${prs_path}${prs_prefix}${test_suffix}.${cur_hp}
+        fi
+    done
 fi
+
+
+if [[ ${stage} -le 3 ]]; then
+            Rscript calc_metrics_ls.R --discovery=${discovery} --target=${target} --imp=${imp}  --sub=${sub} --analysis_type="mono";
+
+fi
+

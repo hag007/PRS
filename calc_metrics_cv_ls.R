@@ -16,4 +16,4 @@ grid.ids.full<- substring(grid.ids.full, 2)
 args <- commandArgs(trailing = TRUE)
 parse.args(args, grid.ids.full, method)
 
-calc.metrics(target.path, imp, prs.path, sub, grid.ids, prs.prefix, suffix, rep)
+calc.metrics(target.path, imp, prs.path, sub, grid.ids, prs.prefix, suffix, rep, analysis.type)

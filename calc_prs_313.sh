@@ -12,6 +12,8 @@ if [[ -z ${memory} ]]; then memory=500000; fi
 if [[ -z ${threads} ]]; then threads=80; fi
 if [[ -z ${hp}  ]]; then hp="0.1"; fi
 if [[ -z ${stage}  ]]; then stage=1; fi
+if [[ -z ${weight_column}  ]]; then weight_column=7; fi
+
 
 # Start pipeline
 
@@ -23,7 +25,7 @@ if [[ $stage -le 1 ]]; then
   echo calculate PRS
   plink \
     --bfile ${target_path}ds \
-    --score ${discovery_path}"313_rsids.tsv" 3 5 7  \
+    --score ${discovery_path}"313_rsids.tsv" 3 5 ${weight_column}  \
     --keep ${datasets_path}${target}/pop.panel \
     --extract ${discovery_path}"313.valid.snp" \
     --memory ${memory} \
@@ -42,3 +44,4 @@ if [[ $stage -le 2 ]]; then
                                          --suffix="${suffix}" --analysis_type="mono" --grid_ids=-1;
   fi
 fi
+

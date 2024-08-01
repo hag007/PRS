@@ -10,19 +10,22 @@ source init_args_cv.sh
 
 prs_prefix="prs.cv.ls__${pop}"
 prs_prefix_adapter="prs.cv.ls_${pheno}_${pop}"
-
 ds_prefix="ds__${pop}"
 
 if [[ -z ${override} ]]; then override="false"; fi
 
-
-
 mkdir -p ${prs_path}lasso ||  true
+
+if [[ ! -f ${imp_train_path}${ds_prefix}${train_suffix}.bim ]]; then
+    echo "${imp_train_path}${ds_prefix}${train_suffix}.bim" does not exists. Skipping...
+    exit 0
+fi
+
 
 if [[ ${stage} -le 1 ]]; then
     	    Rscript lassosum.R --discovery=${discovery} --target=${target} --imp=${imp} \
     	                       --train_suffix=${train_suffix} --test_suffix=${test_suffix} \
-    	                       --rep=${rep} --analysis_type="cv";
+    	                       --rep=${rep} --analysis_type="cv" --ld=${ld};
 fi
 
 
@@ -43,7 +46,7 @@ if [[ ${stage} -le 2 ]]; then
                       --exclude ${imp_test_path}ds.dupvar \
                       --memory 20000 \
                       --threads 5 \
-                      --out ${prs_path}${prs_prefix_adapter}${test_suffix}.${cur_hp}-${hp2}
+                      --out ${prs_path}${prs_prefix_adapter}${test_suffix}.${cur_hp}-${hp2} || true
 
                 fi
         done
